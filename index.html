@@ -5,246 +5,428 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>姥姥的树存档</title>
     <style>
-        /* --- 基础样式 --- */
-        body { margin: 0; padding: 0; font-family: "Microsoft YaHei", sans-serif; background-color: #f5f7fa; display: flex; height: 100vh; overflow: hidden; }
+        /* --- 全局变量与基础设置 --- */
+        :root {
+            --primary-green: #66bb6a;       /* 主色调：清新绿 */
+            --dark-green: #2e7d32;          /* 深绿：用于文字强调 */
+            --light-bg: #f1f8e9;            /* 背景色：极淡绿 */
+            --white: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --shadow: 0 4px 12px rgba(46, 125, 50, 0.1);
+        }
 
-        /* 左侧侧边栏 (目录) */
-        #sidebar {
-            width: 260px;
-            background-color: #ffffff;
-            border-right: 1px solid #e0e0e0;
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            transition: all 0.3s ease;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-            z-index: 10;
         }
 
-        /* 顶部大标题区域 */
-        .main-title-box {
-            padding: 20px;
-            background-color: #fff;
-            border-bottom: 1px solid #eee;
-        }
-        .main-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin: 0;
-        }
-
-        /* 目录列表容器 */
-        #nav-list {
-            flex: 1;
-            overflow-y: auto; /* 允许滚动 */
-            padding: 10px 0;
-        }
-
-        /* 每一个小标题条目 */
-        .nav-item {
-            padding: 12px 20px;
-            cursor: pointer;
-            border-left: 4px solid transparent;
-            color: #555;
-            font-size: 14px;
-            transition: all 0.2s;
+        /* --- 顶部导航栏 --- */
+        header {
+            background-color: var(--white);
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .nav-item:hover {
-            background-color: #f0f7ff;
-            color: #1890ff;
-        }
-
-        /* 选中状态 */
-        .nav-item.active {
-            background-color: #e6f7ff;
-            color: #1890ff;
-            border-left-color: #1890ff;
+        .header-title {
+            font-size: 1.2rem;
             font-weight: bold;
+            color: var(--dark-green);
+            cursor: pointer;
         }
 
-        /* 右侧内容显示区 */
-        #content-area {
-            flex: 1;
+        /* --- 首页样式 (Grid布局) --- */
+        #home-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+            width: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .home-hero {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 40px 0;
+        }
+
+        .home-hero h1 {
+            font-size: 2rem;
+            color: var(--dark-green);
+            margin-bottom: 10px;
+        }
+
+        .home-hero p {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+        }
+
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* 自适应列宽 */
+            gap: 15px;
+        }
+
+        .link-card {
+            background: var(--white);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-main);
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, background 0.2s;
+            border: 1px solid transparent;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        .link-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-green);
+            color: var(--dark-green);
+        }
+
+        /* --- 内容阅读页样式 --- */
+        #content-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            display: none; /* 默认隐藏 */
+            min-height: calc(100vh - 150px); /* 保证有足够高度触发滚动 */
             position: relative;
-            background-color: #fafafa;
         }
 
-        /* iframe 用于显示子页面 */
+        .article-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .article-title {
+            font-size: 1.5rem;
+            color: var(--dark-green);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--light-bg);
+            padding-bottom: 10px;
+        }
+
+        .iframe-wrapper {
+            width: 100%;
+            height: 70vh; /* 占据屏幕高度的70% */
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+
         iframe {
             width: 100%;
             height: 100%;
             border: none;
-            display: block;
         }
 
-        /* 翻页控制条 (悬浮在iframe上方) */
-        .page-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 15px;
-            border-radius: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        /* --- 翻页控制 --- */
+        .pagination {
             display: flex;
-            gap: 10px;
+            justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(5px);
+            margin-top: 20px;
+            padding: 10px 0;
         }
 
-        .page-btn {
-            background: #1890ff;
+        .btn {
+            background-color: var(--primary-green);
             color: white;
             border: none;
-            padding: 5px 12px;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 20px;
             cursor: pointer;
-            font-size: 12px;
-        }
-        .page-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        .page-info {
-            font-size: 12px;
-            color: #666;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
         }
 
-        /* 移动端适配 */
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            #sidebar { width: 100%; height: 60px; flex-direction: row; border-right: none; border-bottom: 1px solid #ddd; }
-            .main-title-box { display: none; } /* 手机上隐藏大标题省空间 */
-            #nav-list { display: flex; overflow-x: auto; padding: 0; }
-            .nav-item { white-space: nowrap; border-left: none; border-bottom: 4px solid transparent; padding: 15px; }
-            .nav-item.active { border-left: none; border-bottom-color: #1890ff; }
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+        }
+
+        /* --- 到底提示 --- */
+        #bottom-indicator {
+            text-align: center;
+            color: var(--primary-green);
+            font-size: 0.9rem;
+            margin-top: 30px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            padding-bottom: 60px; /* 留出空间给悬浮球 */
+        }
+
+        #bottom-indicator.visible {
+            opacity: 1;
+        }
+
+        /* --- 悬浮目录球 --- */
+        .fab-menu {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary-green);
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .fab-menu:hover {
+            transform: scale(1.1);
+        }
+
+        .fab-icon {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+
+        /* --- 全屏目录弹窗 --- */
+        #directory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.98);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .dir-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dir-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--dark-green);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-sub);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .dir-list {
+            list-style: none;
+        }
+
+        .dir-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: background 0.2s;
+        }
+
+        .dir-item:hover {
+            background-color: var(--light-bg);
+            color: var(--dark-green);
+        }
+
+        /* --- 动画 --- */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        /* --- 手机端适配微调 --- */
+        @media (max-width: 600px) {
+            .link-grid {
+                grid-template-columns: repeat(2, 1fr); /* 手机上一行两个 */
+                gap: 10px;
+            }
+            .home-hero h1 { font-size: 1.5rem; }
+            .article-card { padding: 20px; }
+            .iframe-wrapper { height: 60vh; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 左侧目录 -->
-    <div id="sidebar">
-        <div class="main-title-box">
-            <h1 class="main-title">姥姥的树存档</h1>
+    <!-- 顶部 -->
+    <header>
+        <div class="header-title" onclick="goHome()">🌿 姥姥的树存档</div>
+    </header>
+
+    <!-- 首页容器 -->
+    <div id="home-container">
+        <div class="home-hero">
+            <h1>姥姥的树存档</h1>
+            <p>记录那些珍贵的瞬间与讨论</p>
         </div>
-        <div id="nav-list">
-            <!-- JS 将在这里生成目录 -->
+        <div class="link-grid" id="link-grid">
+            <!-- JS将在这里生成链接 -->
         </div>
     </div>
 
-    <!-- 右侧内容 -->
-    <div id="content-area">
-        <iframe id="main-frame" src=""></iframe>
+    <!-- 内容页容器 -->
+    <div id="content-container">
+        <div class="article-card">
+            <h2 class="article-title" id="current-title">标题加载中...</h2>
+            <div class="iframe-wrapper">
+                <iframe id="content-frame" src=""></iframe>
+            </div>
+
+            <!-- 到底提示 -->
+            <div id="bottom-indicator">
+                <p>🌱 已经到底啦 🌱</p>
+            </div>
+        </div>
 
         <!-- 翻页按钮 -->
-        <div class="page-controls">
-            <button class="page-btn" id="prev-btn" onclick="changePage(-1)">上一页</button>
-            <span class="page-info" id="page-indicator">第 1 / 1 页</span>
-            <button class="page-btn" id="next-btn" onclick="changePage(1)">下一页</button>
+        <div class="pagination">
+            <button class="btn" id="prev-btn" onclick="changePage(-1)">上一页</button>
+            <span class="page-info" id="page-info">第 1 / 1 页</span>
+            <button class="btn" id="next-btn" onclick="changePage(1)">下一页</button>
         </div>
+    </div>
+
+    <!-- 悬浮目录球 -->
+    <div class="fab-menu" onclick="toggleDirectory()">
+        <!-- SVG 树图标 -->
+        <svg class="fab-icon" viewBox="0 0 24 24">
+            <path d="M12,2L15,8H19L16,13L18,19H13L12,22L11,19H6L8,13L5,8H9L12,2M12,4.8L10.2,8.4H7.8L9.6,12L8.4,15.6H10.8L12,19.2L13.2,15.6H15.6L14.4,12L16.2,8.4H13.8L12,4.8Z" />
+        </svg>
+    </div>
+
+    <!-- 全屏目录弹窗 -->
+    <div id="directory-overlay">
+        <div class="dir-header">
+            <span class="dir-title">📑 文章目录</span>
+            <button class="close-btn" onclick="toggleDirectory()">×</button>
+        </div>
+        <ul class="dir-list" id="dir-list-ul">
+            <!-- JS填充目录 -->
+        </ul>
     </div>
 
     <script>
-        // ==========================================
-        // 核心配置区：严格按照您的要求排列
-        // pages: 代表该文件夹下有几个html文件 (1.html, 2.html...)
-        // ==========================================
+        // --- 核心数据结构 (严格按照您的要求排序和分页) ---
         const archiveData = [
-            { title: "史官楼", folder: "史官楼", pages: 2 },
-            { title: "吵架1", folder: "吵架1", pages: 3 },
-            { title: "吵架2", folder: "吵架2", pages: 3 },
-            { title: "吵架3", folder: "吵架3", pages: 1 },
-            { title: "吵架4", folder: "吵架4", pages: 1 },
-            { title: "姥组吵架整理", folder: "姥组吵架整理", pages: 1 },
-            { title: "苹果凌晨出没", folder: "苹果凌晨出没", pages: 1 },
-            { title: "建议楼", folder: "建议楼", pages: 1 },
-            { title: "组务投票楼", folder: "组务投票楼", pages: 1 },
-            { title: "管理员留任投票楼", folder: "管理员留任投票楼", pages: 1 },
-            { title: "投票2号", folder: "投票2号", pages: 1 },
-            { title: "管理组群内", folder: "管理组群内", pages: 1 },
-            { title: "三天后狐狸第一次现身组内", folder: "三天后狐狸第一次现身组内", pages: 1 },
-            { title: "组员发帖1", folder: "组员发帖1", pages: 2 },
-            { title: "苹果现身组内", folder: "苹果现身组内", pages: 2 } // 已修正为 2 页
+            { title: "史官楼", pages: 2 },
+            { title: "吵架1", pages: 3 },
+            { title: "吵架2", pages: 3 },
+            { title: "吵架3", pages: 1 },
+            { title: "吵架4", pages: 1 },
+            { title: "姥组吵架整理", pages: 1 },
+            { title: "苹果凌晨出没", pages: 1 },
+            { title: "建议楼", pages: 1 },
+            { title: "组务投票楼", pages: 1 },
+            { title: "管理员留任投票楼", pages: 1 },
+            { title: "投票2号", pages: 1 },
+            { title: "管理组群内", pages: 1 },
+            { title: "三天后狐狸第一次现身组内", pages: 1 },
+            { title: "组员发帖1", pages: 2 },
+            { title: "苹果现身组内", pages: 2 } // 已修正为2页
         ];
 
-        let currentIndex = 0; // 当前选中的章节索引
-        let currentPage = 1;  // 当前章节内的页码
+        let currentFolderIndex = -1; // -1 代表在首页
+        let currentPage = 1;
 
-        const navListEl = document.getElementById('nav-list');
-        const frameEl = document.getElementById('main-frame');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const indicatorEl = document.getElementById('page-indicator');
+        // --- 初始化 ---
+        window.onload = function() {
+            renderHomeLinks();
+            renderDirectoryList();
 
-        // 初始化
-        function init() {
-            renderNav();
-            loadContent(0, 1); // 默认加载第一个
-        }
+            // 监听 iframe 内部滚动来显示“到底了”
+            // 注意：由于跨域限制，如果本地直接打开文件可能无法完美监听 iframe 内部滚动
+            // 这里我们主要监听整个页面的滚动作为兜底，或者假设同源
+            window.addEventListener('scroll', checkScrollBottom);
+        };
 
-        // 渲染左侧目录
-        function renderNav() {
-            navListEl.innerHTML = '';
+        // --- 渲染首页链接 ---
+        function renderHomeLinks() {
+            const grid = document.getElementById('link-grid');
+            grid.innerHTML = '';
             archiveData.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = 'nav-item';
-                div.innerText = item.title;
-                div.onclick = () => loadContent(index, 1); // 点击切换章节，重置为第1页
-                div.id = `nav-${index}`;
-                navListEl.appendChild(div);
+                const a = document.createElement('a');
+                a.className = 'link-card';
+                a.innerText = item.title;
+                a.onclick = () => openArticle(index);
+                grid.appendChild(a);
             });
         }
 
-        // 加载具体内容
-        function loadContent(index, page) {
-            // 边界检查
-            if (index < 0 || index >= archiveData.length) return;
+        // --- 渲染侧边栏/弹窗目录 ---
+        function renderDirectoryList() {
+            const list = document.getElementById('dir-list-ul');
+            list.innerHTML = '';
+            // 添加一个“返回首页”选项
+            const homeLi = document.createElement('li');
+            homeLi.className = 'dir-item';
+            homeLi.innerText = '🏠 返回首页';
+            homeLi.style.color = 'var(--dark-green)';
+            homeLi.style.fontWeight = 'bold';
+            homeLi.onclick = () => { toggleDirectory(); goHome(); };
+            list.appendChild(homeLi);
 
-            currentIndex = index;
-            currentPage = page;
-            const data = archiveData[index];
-
-            // 1. 更新目录高亮
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            const activeNav = document.getElementById(`nav-${index}`);
-            if(activeNav) {
-                activeNav.classList.add('active');
-                activeNav.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-
-            // 2. 设置 iframe 地址
-            // 假设结构是：根目录/文件夹名/页码.html
-            const url = `${data.folder}/${page}.html`;
-            frameEl.src = url;
-
-            // 3. 更新翻页按钮状态
-            updateControls(data.pages);
+            archiveData.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'dir-item';
+                li.innerText = `${index + 1}. ${item.title}`;
+                li.onclick = () => {
+                    toggleDirectory();
+                    openArticle(index);
+                };
+                list.appendChild(li);
+            });
         }
 
-        // 翻页逻辑
-        function changePage(delta) {
-            const data = archiveData[currentIndex];
-            const newPage = currentPage + delta;
+        // --- 核心功能：打开文章 ---
+        function openArticle(index) {
+            currentFolderIndex = index;
+            currentPage = 1;
 
-            if (newPage >= 1 && newPage <= data.pages) {
-                loadContent(currentIndex, newPage);
-            }
-        }
-
-        // 更新按钮显示
-        function updateControls(totalPages) {
-            indicatorEl.innerText = `第 ${currentPage} / ${totalPages} 页`;
-            prevBtn.disabled = (currentPage <= 1);
-            nextBtn.disabled = (currentPage >= totalPages);
-        }
-
-        // 启动
-        init();
-    </script>
-</body>
-</html>
+            // 切换视图
+            document.getElementById('home-container').style.display = 'none';
+            document.getElementById('content-container').style
